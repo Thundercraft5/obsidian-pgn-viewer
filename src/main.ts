@@ -1,4 +1,5 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
+import LichessPgnViewer from "lichess-pgn-viewer"
 
 // Remember to rename these classes and interfaces!
 
@@ -11,13 +12,15 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 }
 
 export default class MyPlugin extends Plugin {
+	CODE_BLOCK_PREFIX = "chess-tools" as const;
+	acceptedFileExtensions: ["fen", "pgn"]
 	settings: MyPluginSettings;
 
 	async onload() {
 		await this.loadSettings();
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
+		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', e => {
 			// Called when the user clicks the icon.
 			new Notice('This is a notice!');
 		});
@@ -40,7 +43,7 @@ export default class MyPlugin extends Plugin {
 		this.addCommand({
 			id: 'sample-editor-command',
 			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
+			editorCallback: (editor, view) => {
 				console.log(editor.getSelection());
 				editor.replaceSelection('Sample Editor Command');
 			}
@@ -49,7 +52,7 @@ export default class MyPlugin extends Plugin {
 		this.addCommand({
 			id: 'open-sample-modal-complex',
 			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
+			checkCallback: (checking) => {
 				// Conditions to check
 				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
 				if (markdownView) {
@@ -70,12 +73,27 @@ export default class MyPlugin extends Plugin {
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
+		this.registerDomEvent(document, 'click', e => {
+			console.log('this.click,0', e);
 		});
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+
+		this.registerMarkdownCodeBlockProcessor(this.CODE_BLOCK_PREFIX, (source, el, ctx) => {
+			console.log(source);
+			const div = document.createElement("div");
+			
+			el.appendChild(div);
+
+			LichessPgnViewer(div, {
+				pgn: source,
+			})
+			console.log(el);
+		});
+		this.registerMarkdownPostProcessor((el, ctx) => {
+			
+		})
 	}
 
 	onunload() {

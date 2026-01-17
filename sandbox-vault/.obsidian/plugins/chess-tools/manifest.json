@@ -1,0 +1,9 @@
+{
+	"id": "chess-tools",
+	"name": "Chess Tools",
+	"minAppVersion": "0.15.0",
+	"description": "Chess Functionality for Obsidian, including embedding PGN/FEN files",
+	"author": "Thundercraft5",
+	"authorUrl": "https://github.com/Thundercraft5",
+	"isDesktopOnly": false
+}
